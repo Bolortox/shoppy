@@ -1,40 +1,18 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import mongoose from "mongoose";
+import { getProdData, prodRouter } from "./routes/ProductsR.js";
+mongoose.connect(
+  "mongodb+srv://bolortogosboujee:YKQJCyO8XUM1rnmN@bolortox.i93uz.mongodb.net/test"
+);
+const PORT = 8080;
+const server = express();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+server.use(cors());
+server.use("/api", prodRouter);
+server.use("/api", getProdData )
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error(err));
-
-// Product Schema
-const ProductSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  image: String,
+server.listen(PORT, () => {
+  console.log(`server is working http://localhost:${PORT}`);
 });
-
-const Product = mongoose.model("Product", ProductSchema);
-
-// Routes
-app.post("/products", async (req, res) => {
-  const newProduct = new Product(req.body);
-  await newProduct.save();
-  res.json(newProduct);
-});
-
-app.get("/products", async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
-});
-
-// Start Server
-app.listen(5000, () => console.log("Server running on port 5000"));
